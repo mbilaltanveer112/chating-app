@@ -1,0 +1,8 @@
+{
+  "name": "PulseChat (adv)",
+  "description": "Real-time Android messaging app with Google Sign-In, media \u0026 voice notes, group chats, and call etc\n",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

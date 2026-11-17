@@ -1,0 +1,593 @@
+{
+  "entities": {
+    "UserPrivate": {
+      "title": "UserPrivate",
+      "description": "Private user account profile and preferences containing PII, isolated to the owner UID.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID of the user."
+        },
+        "username": {
+          "type": "string",
+          "description": "Normalized lowercase unique username bound to Firebase Auth UID."
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address from Google Sign-In or recovery setup."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Verified E.164 mobile phone number."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name."
+        },
+        "bio": {
+          "type": "string",
+          "description": "User status bio."
+        },
+        "avatarData": {
+          "type": "string",
+          "description": "Base64 encoded compressed avatar image."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "Optional profile photo URL."
+        },
+        "darkModeEnabled": {
+          "type": "boolean",
+          "description": "User dark theme preference."
+        },
+        "notificationsEnabled": {
+          "type": "boolean",
+          "description": "In-app/local notification preference."
+        },
+        "chatThemes": {
+          "type": "object",
+          "description": "Per-conversation accent color, background style, and personal/work tag preferences keyed by chatId."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when profile was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when profile was last updated."
+        }
+      },
+      "required": ["userId", "displayName", "createdAt"]
+    },
+    "PublicProfile": {
+      "title": "PublicProfile",
+      "description": "Non-PII public profile used for user search, online status, and chat member discovery.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID of the user."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Public display name."
+        },
+        "handle": {
+          "type": "string",
+          "description": "Public handle for search."
+        },
+        "bio": {
+          "type": "string",
+          "description": "Short public bio."
+        },
+        "avatarData": {
+          "type": "string",
+          "description": "Base64 encoded compressed avatar image."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "Optional public avatar photo URL."
+        },
+        "isOnline": {
+          "type": "boolean",
+          "description": "Whether the user is currently online."
+        },
+        "discoverable": {
+          "type": "boolean",
+          "description": "Whether the profile is discoverable in directory queries."
+        },
+        "lastSeenVisibility": {
+          "type": "string",
+          "enum": ["everyone", "contacts", "nobody"],
+          "description": "Who can view this user's last seen timestamp."
+        },
+        "onlineVisibility": {
+          "type": "string",
+          "enum": ["everyone", "same_as_last_seen", "contacts", "nobody"],
+          "description": "Who can view this user's real-time online indicator."
+        },
+        "lastSeen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last seen server timestamp."
+        },
+        "lastHeartbeatAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Latest server heartbeat timestamp from an active foreground session."
+        },
+        "activeSessions": {
+          "type": "object",
+          "description": "Map of active device session IDs to their latest heartbeat server timestamp."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp."
+        }
+      },
+      "required": ["userId", "displayName", "handle", "isOnline", "discoverable", "createdAt"]
+    },
+    "UserKeyBundle": {
+      "title": "UserKeyBundle",
+      "description": "Public X3DH-style pre-key bundle published by each user for Signal-inspired E2EE session establishment.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase UID."
+        },
+        "identityPublicKey": {
+          "type": "string",
+          "description": "Base64 X.509 EC P-256 identity public key."
+        },
+        "signedPreKeyPublic": {
+          "type": "string",
+          "description": "Base64 X.509 EC P-256 signed pre-key."
+        },
+        "signedPreKeySignature": {
+          "type": "string",
+          "description": "ECDSA SHA256 signature of signedPreKeyPublic using identity private key."
+        },
+        "oneTimePreKeyPublic": {
+          "type": "string",
+          "description": "Base64 X.509 EC P-256 ephemeral/one-time pre-key."
+        },
+        "keyFingerprint": {
+          "type": "string",
+          "description": "Short SHA-256 public key fingerprint."
+        },
+        "protocolVersion": {
+          "type": "integer",
+          "description": "E2EE protocol version."
+        },
+        "keyVersion": {
+          "type": "integer",
+          "description": "Monotonically increasing key rotation version."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "identityPublicKey", "signedPreKeyPublic", "signedPreKeySignature", "oneTimePreKeyPublic", "keyFingerprint", "protocolVersion", "keyVersion", "createdAt"]
+    },
+    "BlockedUserRecord": {
+      "title": "BlockedUserRecord",
+      "description": "Active block entry stored under /users/{userId}/blocked_users/{targetUid} for server-enforced messaging and call blocking.",
+      "type": "object",
+      "properties": {
+        "blockerUid": { "type": "string" },
+        "blockedUid": { "type": "string" },
+        "blockedDisplayName": { "type": "string" },
+        "blockedHandle": { "type": "string" },
+        "reason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["blockerUid", "blockedUid", "blockedDisplayName", "createdAt"]
+    },
+    "BlockedByMarker": {
+      "title": "BlockedByMarker",
+      "description": "Privacy-preserving marker under /users/{targetUid}/blocked_by/{blockerUid} so a blocked user hides the blocker's online/last seen status without reading the blocker's full block list.",
+      "type": "object",
+      "properties": {
+        "blockerUid": { "type": "string" },
+        "blockedUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["blockerUid", "blockedUid", "createdAt"]
+    },
+    "BlockHistoryEvent": {
+      "title": "BlockHistoryEvent",
+      "description": "Immutable audit log entry of block/unblock events stored under /users/{userId}/block_history/{eventId}.",
+      "type": "object",
+      "properties": {
+        "blockerUid": { "type": "string" },
+        "targetUid": { "type": "string" },
+        "targetDisplayName": { "type": "string" },
+        "action": { "type": "string", "enum": ["blocked", "unblocked"] },
+        "reason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["blockerUid", "targetUid", "targetDisplayName", "action", "createdAt"]
+    },
+    "SecurityConfigDoc": {
+      "title": "SecurityConfigDoc",
+      "description": "Owner-only security, 2FA, chat lock, privacy, and spam guard state under /users/{userId}/security/{docId}.",
+      "type": "object",
+      "properties": {
+        "docType": { "type": "string", "enum": ["two_step", "chat_lock", "privacy_settings", "spam_guard"] },
+        "enabled": { "type": "boolean" },
+        "pinHash": { "type": "string" },
+        "pinSalt": { "type": "string" },
+        "recoveryEmail": { "type": "string" },
+        "recoveryCodeHash": { "type": "string" },
+        "recoveryCodeSalt": { "type": "string" },
+        "registeredDeviceIds": { "type": "array" },
+        "failedAttempts": { "type": "integer" },
+        "lockedUntilEpochMs": { "type": "integer" },
+        "lockedChatIds": { "type": "array" },
+        "biometricEnabled": { "type": "boolean" },
+        "lockPinHash": { "type": "string" },
+        "lockPinSalt": { "type": "string" },
+        "lastSeenVisibility": { "type": "string", "enum": ["everyone", "contacts", "nobody"] },
+        "onlineVisibility": { "type": "string", "enum": ["everyone", "same_as_last_seen", "contacts", "nobody"] },
+        "screenshotMode": { "type": "string", "enum": ["allow", "block"] },
+        "defaultDisappearingSeconds": { "type": "integer" },
+        "spamProtectionLevel": { "type": "string", "enum": ["off", "standard", "strict"] },
+        "e2eeEnabled": { "type": "boolean" },
+        "restrictedUntilEpochMs": { "type": "integer" },
+        "violationCount": { "type": "integer" },
+        "lastViolationReason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["docType", "createdAt"]
+    },
+    "UserReport": {
+      "title": "UserReport",
+      "description": "User, message, or problem safety report submitted for moderation and admin review.",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "reporterName": { "type": "string" },
+        "reportedUserId": { "type": "string" },
+        "reportedUserName": { "type": "string" },
+        "chatId": { "type": "string" },
+        "messageId": { "type": "string" },
+        "messagePreview": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["spam", "harassment", "fake_profile", "inappropriate_content", "suspicious_link", "problem", "other"]
+        },
+        "description": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "under_review", "resolved", "dismissed"]
+        },
+        "reviewNotes": { "type": "string" },
+        "reviewedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "reporterName", "reportedUserId", "category", "status", "createdAt"]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "Server-provisioned moderation admin marker document.",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["role"]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "description": "Direct or group conversation room metadata.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["direct", "group"],
+          "description": "Conversation type."
+        },
+        "title": {
+          "type": "string",
+          "description": "Group name or fallback conversation title."
+        },
+        "memberUids": {
+          "type": "array",
+          "description": "Bounded list of participant UIDs (max 20)."
+        },
+        "memberNames": {
+          "type": "object",
+          "description": "Map of participant UID to display name."
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "UID of user who created the chat."
+        },
+        "lastMessageText": {
+          "type": "string",
+          "description": "Preview of the most recent message."
+        },
+        "lastMessageType": {
+          "type": "string",
+          "enum": ["text", "image", "video", "document", "voice", "ai_image", "call", "system"],
+          "description": "Content type of the last message."
+        },
+        "lastMessageSenderId": {
+          "type": "string",
+          "description": "UID of the sender of the last message."
+        },
+        "lastMessageAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the last message."
+        },
+        "pinnedBy": {
+          "type": "array",
+          "description": "UIDs that pinned this chat."
+        },
+        "archivedBy": {
+          "type": "array",
+          "description": "UIDs that archived this chat."
+        },
+        "typingUids": {
+          "type": "array",
+          "description": "UIDs currently typing in this chat."
+        },
+        "typingTimestamps": {
+          "type": "object",
+          "description": "Map of UID to server timestamp when typing started or refreshed."
+        },
+        "deliveredByUids": {
+          "type": "array",
+          "description": "UIDs whose devices have received/synced the latest message."
+        },
+        "readByUids": {
+          "type": "array",
+          "description": "UIDs that have read the latest message."
+        },
+        "disappearingDurationSeconds": {
+          "type": "integer",
+          "description": "Disappearing message timer duration in seconds (0 = Off, 86400 = 24h, 604800 = 7d, 2592000 = 30d)."
+        },
+        "disappearingUpdatedBy": {
+          "type": "string",
+          "description": "UID of participant who updated disappearing message timer."
+        },
+        "disappearingUpdatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp."
+        }
+      },
+      "required": ["type", "title", "memberUids", "createdBy", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Real-time message inside a chat room supporting E2EE text, encrypted media, disappearing messages, and system security notices.",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "memberUids": { "type": "array" },
+        "type": {
+          "type": "string",
+          "enum": ["text", "image", "video", "document", "voice", "ai_image", "call", "system"]
+        },
+        "text": { "type": "string" },
+        "mediaData": { "type": "string" },
+        "mediaFileName": { "type": "string" },
+        "mediaMimeType": { "type": "string" },
+        "mediaSizeBytes": { "type": "integer" },
+        "durationMs": { "type": "integer" },
+        "waveform": { "type": "array" },
+        "replyToMessageId": { "type": "string" },
+        "replyToSenderName": { "type": "string" },
+        "replyToPreview": { "type": "string" },
+        "forwardedFrom": { "type": "string" },
+        "deliveredByUids": { "type": "array" },
+        "deliveredTimestamps": { "type": "object" },
+        "readByUids": { "type": "array" },
+        "readTimestamps": { "type": "object" },
+        "reactions": { "type": "object" },
+        "deleted": { "type": "boolean" },
+        "isEncrypted": { "type": "boolean" },
+        "encryptionVersion": { "type": "integer" },
+        "encryptedPayload": { "type": "string" },
+        "encryptedMediaData": { "type": "string" },
+        "wrappedKeys": { "type": "object" },
+        "expiresAtEpochMs": { "type": "integer" },
+        "systemEventType": { "type": "string" },
+        "screenshotActorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "senderId", "senderName", "memberUids", "type", "text", "createdAt"]
+    },
+    "CallSession": {
+      "title": "CallSession",
+      "description": "Real-time 1:1 WebRTC voice or video call signaling session and persistent call history entry.",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "callerId": { "type": "string" },
+        "callerName": { "type": "string" },
+        "callerAvatarData": { "type": "string" },
+        "callerPhotoUrl": { "type": "string" },
+        "calleeId": { "type": "string" },
+        "calleeName": { "type": "string" },
+        "calleeAvatarData": { "type": "string" },
+        "calleePhotoUrl": { "type": "string" },
+        "participantUids": { "type": "array" },
+        "callType": { "type": "string", "enum": ["voice", "video"] },
+        "status": {
+          "type": "string",
+          "enum": ["calling", "ringing", "connecting", "connected", "reconnecting", "ended", "rejected", "missed", "failed"]
+        },
+        "offerSdp": { "type": "string" },
+        "answerSdp": { "type": "string" },
+        "endedBy": { "type": "string" },
+        "endReason": { "type": "string" },
+        "durationSeconds": { "type": "integer" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "callerId", "callerName", "calleeId", "calleeName", "participantUids", "callType", "status", "createdAt"]
+    },
+    "IceCandidateRecord": {
+      "title": "IceCandidateRecord",
+      "description": "WebRTC ICE candidate exchanged between caller and callee.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "participantUids": { "type": "array" },
+        "sdpMid": { "type": "string" },
+        "sdpMLineIndex": { "type": "integer" },
+        "sdp": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "participantUids", "sdpMid", "sdpMLineIndex", "sdp", "createdAt"]
+    },
+    "PrivateAuthRecord": {
+      "title": "PrivateAuthRecord",
+      "description": "Backend-only Argon2id password hash, failed attempt counters, and recovery challenges managed exclusively by Firebase Cloud Functions (client access denied).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "passwordHash": { "type": "string" },
+        "passwordAlgorithm": { "type": "string", "enum": ["argon2id"] },
+        "authProvider": { "type": "string" },
+        "recoveryEmail": { "type": "string" },
+        "recoveryEmailVerified": { "type": "boolean" },
+        "recoveryPhone": { "type": "string" },
+        "failedLoginCount": { "type": "integer" },
+        "lockedUntilEpochMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "username", "passwordHash", "passwordAlgorithm", "createdAt"]
+    },
+    "UsernameReservation": {
+      "title": "UsernameReservation",
+      "description": "Lowercase username uniqueness index mapping normalized username to Firebase Auth UID and recovery/sign-in email (no password or hash fields). List queries denied.",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "uid": { "type": "string" },
+        "authEmail": { "type": "string" },
+        "emailVerified": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["username", "uid", "authEmail", "createdAt"]
+    },
+    "AuthRateLimitBucket": {
+      "title": "AuthRateLimitBucket",
+      "description": "Backend-only brute-force and rate-limit tracking bucket managed exclusively by Cloud Functions (client access denied).",
+      "type": "object",
+      "properties": {
+        "count": { "type": "integer" },
+        "windowStartEpochMs": { "type": "integer" },
+        "lockedUntilEpochMs": { "type": "integer" },
+        "updatedAtEpochMs": { "type": "integer" }
+      },
+      "required": ["count", "windowStartEpochMs", "lockedUntilEpochMs"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivate" },
+      "description": "Owner-only private user profile and app preferences."
+    },
+    "/users/{userId}/blocked_users/{targetUid}": {
+      "schema": { "$ref": "#/entities/BlockedUserRecord" },
+      "description": "Owner-only active block list referenced by messaging and call security rules."
+    },
+    "/users/{userId}/blocked_by/{blockerUid}": {
+      "schema": { "$ref": "#/entities/BlockedByMarker" },
+      "description": "Marker written by blockerUid so target userId hides blockerUid online/last seen status."
+    },
+    "/users/{userId}/block_history/{eventId}": {
+      "schema": { "$ref": "#/entities/BlockHistoryEvent" },
+      "description": "Owner-only immutable audit trail of block and unblock events."
+    },
+    "/users/{userId}/security/{docId}": {
+      "schema": { "$ref": "#/entities/SecurityConfigDoc" },
+      "description": "Owner-only security configuration for two-step verification, chat lock, privacy settings, and spam guard."
+    },
+    "/public_profiles/{userId}": {
+      "schema": { "$ref": "#/entities/PublicProfile" },
+      "description": "Public non-PII user directory for chat discovery and presence."
+    },
+    "/key_bundles/{userId}": {
+      "schema": { "$ref": "#/entities/UserKeyBundle" },
+      "description": "Public X3DH key bundles for end-to-end encrypted messaging."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRole" },
+      "description": "Provisioned moderation administrators for safety report review."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/UserReport" },
+      "description": "User, message, and problem safety reports with reporter read access and admin review moderation."
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatRoom" },
+      "description": "Direct and group chat rooms scoped to memberUids."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Messages belonging to a chat room with denormalized memberUids."
+    },
+    "/calls/{callId}": {
+      "schema": { "$ref": "#/entities/CallSession" },
+      "description": "Real-time WebRTC signaling sessions and persistent call history scoped to participantUids."
+    },
+    "/calls/{callId}/candidates/{candidateId}": {
+      "schema": { "$ref": "#/entities/IceCandidateRecord" },
+      "description": "Append-only WebRTC ICE candidates for an active call session."
+    },
+    "/private_auth/{userId}": {
+      "schema": { "$ref": "#/entities/PrivateAuthRecord" },
+      "description": "Server-only credentials collection. Client read/write is unconditionally denied."
+    },
+    "/usernames/{username}": {
+      "schema": { "$ref": "#/entities/UsernameReservation" },
+      "description": "Spark-tier unique lowercase username reservation and login identifier index (no passwords stored; list denied)."
+    },
+    "/auth_rate_limits/{bucketId}": {
+      "schema": { "$ref": "#/entities/AuthRateLimitBucket" },
+      "description": "Server-only rate-limit state. Client read/write is unconditionally denied."
+    }
+  }
+}
